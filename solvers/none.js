@@ -24,7 +24,7 @@ SOFTWARE.
 This is a solver which has no implementation, e.g. you do not get positioning
 */
 
-const loraCloudLoadAlmanac = require('./loracloud').loadAlmanac;
+const loraCloudLoadAlmanac = require('./combain-loracloud').loadAlmanac;
 
 module.exports.api = {
     initialize : async (args) => { return undefined; },
