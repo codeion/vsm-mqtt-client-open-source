@@ -12,7 +12,7 @@ const printErrorAndExit = (info) => {
 let client;
 
 module.exports.api = {
-    checkArgumentsOrExit: (args) => { 
+    checkArgumentsOrExit: (args) => {
         if (!args.S)
             printErrorAndExit("MQTT Publisher: -S <mqtt server> is required");
         if (!args.T)
@@ -20,18 +20,18 @@ module.exports.api = {
         if (!args.T.includes(REPLACE_STRING))
             printErrorAndExit("MQTT Publisher: -T <topic format> must contain the substutution string " + REPLACE_STRING)
     },
-    initialize: (args) => { 
-            /* const options = {
+    initialize: (args) => {
+            const options = {
                 // Clean session
-                clean: true,
-                connectTimeout: 4000,
+                // clean: true,
+                // connectTimeout: 4000,
                 // Authentication
-                clientId: args.u,
+                // clientId: args.u,
                 username: args.u,
                 password: args.p,
-            } */
-            
-            client = mqtt.connect(args.S /*, options*/);
+            }
+
+            client = mqtt.connect(args.S , options);
 
             client.on('connect', () => {
                 args.v && console.log("MQTT Publisher: Connected to mqtt broker");
@@ -50,4 +50,3 @@ module.exports.api = {
         return "MQTT Publisher";
     }
 }
-
