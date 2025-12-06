@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+const LOG = require('./utils/log');
 const { mergeDeep, delay } = require('./util');
 let translatorVersion = "";
 try {
@@ -31,7 +32,7 @@ try {
   // Running as npm package
   translatorVersion = require('../vsm-translator-open-source/package.json').version;
 }
-console.log("Translator Version: " + translatorVersion);
+LOG.info("Translator Version: " + translatorVersion);
 
 const ASSISTANCE_INTERVAL_S =  60*30; // max 300km/h
 const MAX_ALMANAC_AGE_S =   60*60*24*30; // This is a monthly process
@@ -56,7 +57,7 @@ const downlinkAssistancePositionIfMissing = async (args, integration, client, so
       if (now.getTime() - lastTime.getTime() < ASSISTANCE_INTERVAL_S*1000) {
         return next; // Do nothing
       }
-    } 
+    }
 
     if (!next.gnss.assistanceLatitude || Math.abs(lat - next.gnss.assistanceLatitude) > 0.1)
       updateRequired = true;
@@ -76,7 +77,7 @@ const downlinkAssistancePositionIfMissing = async (args, integration, client, so
       while (str.length < 4)
         str = "0"+str;
       downlink += str;
-  
+
       integration.api.sendDownlink(client, args, deviceid, 21, Buffer.from(downlink, "hex"), false /* confirmed */ );
     }
   }
@@ -99,10 +100,10 @@ const downlinkAlmanac = async (args, integration, client, solver, deviceid, maxS
             console.log("Bad alamanac data");
             return;
         }
-    
+
         const compressedAlmanac = almanac.result.almanac_compressed;
         const image = compressedAlmanac ? compressedAlmanac : almanac.result.almanac_image;
-    
+
         let maxDownlinkSize = maxSize - 6; // Give space for some mac commands
         if (maxDownlinkSize < 30) {
           // Does not make sense with this small downlink size for almanac download
@@ -114,10 +115,10 @@ const downlinkAlmanac = async (args, integration, client, solver, deviceid, maxS
         console.log("Selected payload size: " + maxDownlinkSize);
         console.log("Almanac image size: " + image.length / 2 );
         console.log("Downlink count: " + image.length / 2 / maxDownlinkSize);
-    
+
         let chunks = image.match(new RegExp('.{1,' + (maxDownlinkSize*2 /* 40 is randomly selected */ ) + '}', 'g'));
         console.log("Chunks: " + chunks.length);
-    
+
         for (let i = 0; i < chunks.length; ++i) {
             var data;
             if (i === 0) // Begin new almanac
@@ -180,11 +181,21 @@ const rules = [
       // Call semtech to resolve the location
       console.log("New positioning data");
       let solved = await solver.api.solvePosition(args, updates);
-      if (solved && solved.result && solved.result.latitude && solved.result.longitude) {
+      if (solved && solved.result) {
+        const synthesized = {
+          // place all position fields directly on the object we merge into `next`
+          ...solved.result
+        };
+        if (Array.isArray(solved.warnings)) {
+          synthesized.warnings = solved.warnings;
+        }
+        if (Array.isArray(solved.errors)) {
+          synthesized.errors = solved.errors;
+        }
         // Extra check: If we have a result here but no assistance data in the device, use this to generate an assistance position
         // and downlink it to the device
         downlinkAssistancePositionIfMissing(args, integration, client, solver, deviceid, next, lat, lng);
-        return solved.result;
+        return synthesized;
       } else {
         return null;
       }
@@ -228,7 +239,7 @@ const rules = [
   async (args, integration, client, solver, deviceid, next, updates, date, lat, lng) => {
     if (next.vsm) {
       next.vsm.translatorVersion = translatorVersion;
-    } else 
+    } else
       next.vsm = { translatorVersion };
     return next;
   },
