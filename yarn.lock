@@ -448,6 +448,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-logs@npm:^5.5.0":
+  version: 5.5.0
+  resolution: "react-native-logs@npm:5.5.0"
+  checksum: 10/d0e9592f49524bd4bcb41443eb6af38264f55f403cb144fa4b67aff51b7da5cc276b229fdbbfefabe0d337ce34c9f18d416b4ca0c5c06c4eaa915cfe5d119477
+  languageName: node
+  linkType: hard
+
 "readable-stream@npm:^3.0.0, readable-stream@npm:^3.0.2, readable-stream@npm:^3.1.1, readable-stream@npm:^3.4.0, readable-stream@npm:^3.6.0":
   version: 3.6.2
   resolution: "readable-stream@npm:3.6.2"
@@ -545,6 +552,7 @@ __metadata:
     mongodb: "npm:6.3.0"
     mqtt: "npm:4.3.7"
     node-fetch: "npm:3.3.1"
+    react-native-logs: "npm:^5.5.0"
     vsm-translator-open-source: "npm:^0.2.157"
   languageName: unknown
   linkType: soft

@@ -1,11 +1,11 @@
 // Publisher which publishes on mqtt
-
-const mqtt = require('mqtt')
+const LOG = require('../utils/log');
+const mqtt = require('mqtt');
 
 const REPLACE_STRING = "deveui";
 
 const printErrorAndExit = (info) => {
-    console.log(info);
+    LOG.error(info);
     process.exit(1);
 }
 
@@ -34,16 +34,16 @@ module.exports.api = {
             client = mqtt.connect(args.S , options);
 
             client.on('connect', () => {
-                args.v && console.log("MQTT Publisher: Connected to mqtt broker");
+                args.v && LOG.info("MQTT Publisher: Connected to mqtt broker");
             });
     },
     publish: (args, deviceid, obj) => {
-        console.log("MQTT Publishing", deviceid, obj);
+        LOG.info("MQTT Publishing", deviceid, obj);
         const topic = args.T.replace(REPLACE_STRING, deviceid);
         try {
             client.publish(topic,  JSON.stringify(obj));
         } catch (e) {
-            console.log("MQTT Publisher: Failed to publish: ", e.message);
+            LOG.error("MQTT Publisher: Failed to publish: ", e.message);
         }
     },
     getVersionString: () => {

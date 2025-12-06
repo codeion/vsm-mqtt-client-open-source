@@ -1,7 +1,8 @@
+const LOG = require('../utils/log');
 const mqtt = require('mqtt');
 
 const printUsageAndExit = (info) => {
-  console.log(info);
+  LOG.error(info);
   process.exit(1);
 };
 
@@ -17,7 +18,7 @@ module.exports.api = {
   },
 
   connectAndSubscribe: async (args, devices, onUplinkDevicePortBufferDateLatLng) => {
-    args.v && console.log('Trying to connect to', args.s);
+    args.v && LOG.info('Trying to connect to', args.s);
 
     const options = {
       username: args.u,
@@ -27,16 +28,16 @@ module.exports.api = {
     const client = mqtt.connect(args.s, options);
 
     client.on('connect', () => {
-      args.v && console.log('Frigo: Connected to mqtt broker');
+      args.v && LOG.info('Frigo: Connected to mqtt broker');
 
       if (Array.isArray(devices) && devices.length > 0) {
         devices.forEach((devEui) => {
           const topic = `mqtt/munin/${devEui.toUpperCase()}/uplink`;
           client.subscribe(topic, (err) => {
             if (err) {
-              console.log(`Frigo subscribe failed: ${topic}: ${err.message}`);
+              LOG.error(`Frigo subscribe failed: ${topic}: ${err.message}`);
             } else {
-              args.v && console.log(`Frigo subscribed to ${topic}`);
+              args.v && LOG.info(`Frigo subscribed to ${topic}`);
             }
           });
         });
@@ -44,9 +45,9 @@ module.exports.api = {
         const topic = 'mqtt/munin/+/uplink';
         client.subscribe(topic, (err) => {
           if (err) {
-            console.log(`Frigo wildcard subscribe failed: ${topic}: ${err.message}`);
+            LOG.error(`Frigo wildcard subscribe failed: ${topic}: ${err.message}`);
           } else {
-            args.v && console.log(`Frigo wildcard subscribed to ${topic}`);
+            args.v && LOG.info(`Frigo wildcard subscribed to ${topic}`);
           }
         });
       }
@@ -54,7 +55,7 @@ module.exports.api = {
 
     client.on('message', async (topic, message) => {
       try {
-        args.v && console.log('Frigo message:', topic, message.toString());
+        args.v && LOG.info('Frigo message:', topic, message.toString());
 
         // 1) Parse TPX / Actility JSON
         const obj = JSON.parse(message.toString('utf-8'));
@@ -72,7 +73,7 @@ module.exports.api = {
         const id = (frame.DevEUI || '').toUpperCase();
 
         if (!id) {
-          console.log('Frigo: missing DevEUI in frame, skipping');
+          LOG.error('Frigo: missing DevEUI in frame, skipping');
           return;
         }
 
@@ -112,7 +113,7 @@ module.exports.api = {
           maxSize
         );
       } catch (e) {
-        console.log('Frigo: error handling message:', e.message);
+        LOG.error('Frigo: error handling message:', e.message);
       }
     });
 
@@ -120,7 +121,7 @@ module.exports.api = {
   },
 
   sendDownlink: async (client, args, deviceId, port, data, confirmed) => {
-    console.log(
+    LOG.info(
       'Frigo sendDownlink (not implemented yet):',
       deviceId,
       'port',

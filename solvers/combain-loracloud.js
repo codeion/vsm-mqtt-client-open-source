@@ -1,3 +1,4 @@
+const LOG = require('../utils/log');
 const combainLoraCloud= "https://lw.traxmate.io";
 const endpointWifi = combainLoraCloud +"/api/v1/solve/loraWifi";
 const endpointGnss = combainLoraCloud +"/api/v1/solve/gnss_lora_edge_singleframe";
@@ -17,7 +18,7 @@ const solvePosition = async (args, data) => {
     if (isWifi) {
         delete body.timestamp;
         if ((!body.wifiAccessPoints) || body.wifiAccessPoints.length < 2) {
-            console.log(data);
+            LOG.error(data);
             return {errors:["Too few access points to solve position ("+ (body.wifiAccessPoints ? body.wifiAccessPoints.length:"none" )+")"]};
         }
 
@@ -76,29 +77,30 @@ const solvePosition = async (args, data) => {
     delete body.msgtype;
     delete body.timestamp;
     // console.log(body);
+    LOG.post(endpoint);
     const response = await fetch(endpoint,
         {
-          method:"POST", 
+          method:"POST",
           headers: {
             "Authorization": args.k,
             "Content-type" : "application/json",
           },
           body:JSON.stringify(body),
         })
-        .then(response => { 
-            if(!response.ok) { 
-                console.log(response.statusText); 
+        .then(response => {
+            if(!response.ok) {
+                LOG.error(response.statusText);
                 throw new Error('Could not fetch ' + (isWifi ? "wifi":"gnss")+ ' api, response: ' + response.status);
-            } 
+            }
             return response.json();
         })
         .then(data => data)
         .catch(err => {
-          console.log("API failed: " + endpoint + " " + err.message);
+          LOG.error("API failed: " + endpoint + " " + err.message);
           return null;
         });
 
-    args.v && console.log("Combain loraCloud solver response:", response);
+    args.v && LOG.info("Combain loraCloud solver response:", response);
     if (isWifi) {
         if (response && response.result && response.result.algorithmType !== "Wifi")
             return {errors:["Got wrong type of response: " + response.result.algorithmType]};
@@ -163,7 +165,7 @@ const RRLEEncode = (buf) => {
         pos++;
     }
 
-    console.log("RRLE Result: " + output.length + " bytes, original: " + buf.length + " bytes");
+    LOG.info("RRLE Result: " + output.length + " bytes, original: " + buf.length + " bytes");
     return output;
 }
 
@@ -208,10 +210,10 @@ const loadAlmanac = async (args) => {
 
     if (!args.k)
         return;
-    console.log(endpointAlmanac);
+    LOG.get(endpointAlmanac);
     const response = await fetch(endpointAlmanac,
         {
-          method:"GET", 
+          method:"GET",
           headers: {
          //   "Ocp-Apim-Subscription-Key": loraoldcloudapikey,
             "Authorization" : args.k,
@@ -221,7 +223,7 @@ const loadAlmanac = async (args) => {
         .then(response => { if(!response.ok) throw new Error('Login failed - check username and password'); return response.json()})
         .then(data => data)
         .catch(err => {
-          console.log("Login failed - connection problem?");
+          LOG.error("Login failed - connection problem?");
           return null;
         });
 
@@ -242,12 +244,12 @@ const loadAlmanac = async (args) => {
                 throw new Error("Decompression generated wrong result");
             response.result.almanac_compressed = compressed.toString('hex');
         } catch (err) {
-            console.log(err);
+            LOG.error(err);
         }
     }
 
     if (response && response.result && response.result.almanac_image) {
-        console.log("ALMANAC ADDED TO CACHE:", response);
+        LOG.info("ALMANAC ADDED TO CACHE:", response);
         almanacTimestamp_ms = nowMs;
         almanacCache = response;
     }
