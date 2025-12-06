@@ -110,7 +110,8 @@ module.exports.api = {
           date,
           lat,
           lng,
-          maxSize
+          maxSize,
+          frame,
         );
       } catch (e) {
         LOG.error('Frigo: error handling message:', e.message);

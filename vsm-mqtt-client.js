@@ -212,7 +212,7 @@ const run = async () => {
     LOG.info('Series Processor: ', seriesProcessor.getName());
 
   // Function to handle uplinks for a device id on a port with binary data in buffer
-  const onUplinkDevicePortBufferDateLatLng = async (client, deviceid, port, buffer, date, lat, lng, maxSize) => {
+  const onUplinkDevicePortBufferDateLatLng = async (client, deviceid, port, buffer, date, lat, lng, maxSize, rawFrame) => {
     if (!(typeof(deviceid) == "string" && isFinite(port) && Buffer.isBuffer(buffer))) {
       LOG.error(`Integration error: Bad parameter to onUplinkDevicePortBufferDateLatLng:
                   typeof(deviceid):${typeof(deviceid)} (expect string), typeof(port)=${typeof(port)} (expect number), Buffer.isBuffer(buffer)=${Buffer.isBuffer(buffer)}`);
@@ -278,7 +278,7 @@ const run = async () => {
     await putObjectInStore(deviceid, next, /* diff*/ result);
 
     // Publish the data
-    publisher.api.publish(args, deviceid, decorator.api.decorate(next, deviceid));
+    publisher.api.publish(args, deviceid, decorator.api.decorate(next, deviceid, rawFrame));
   }
 
   const runClient = async () => {

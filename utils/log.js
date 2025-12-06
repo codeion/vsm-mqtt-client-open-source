@@ -20,7 +20,7 @@ const LOG = logger.createLogger({
       error: 'redBright',
     },
     extensionColors: {
-      munin: 'blue',
+      munin: 'grey',
     },
   },
   printDate: false,
