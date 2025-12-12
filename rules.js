@@ -177,9 +177,12 @@ const rules = [
 
   // Solve positions and add the solution to the data
   async (args, integration, client, solver, deviceid, next, updates, date, lat, lng) => {
-    if (updates.semtechEncoded && !args.hasOwnProperty("N")) {
+    const hasWifi = updates.semtechEncoded && updates.semtechEncoded.msgtype === "wifi";
+    const hasGnss = updates.gnss && updates.gnss.completeHex;
+
+    if ((hasWifi || hasGnss) && !args.hasOwnProperty("N")) {
       // Call semtech to resolve the location
-      console.log("New positioning data");
+      LOG.info("New positioning data");
       let solved = await solver.api.solvePosition(args, updates);
       if (solved && solved.result) {
         const synthesized = {

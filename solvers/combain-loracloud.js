@@ -13,8 +13,14 @@ const solvePosition = async (args, data) => {
 
     const isWifi = data.semtechEncoded && (data.semtechEncoded.msgtype === "wifi");
     const endpoint = isWifi ? endpointWifi : endpointGnss;
-    let body = isWifi ? data.wifi : (data.semtechEncoded ? data.semtechEncoded : data.semtechGpsEncoded);
+
+    if (!isWifi && !data.gnss?.completeHex) {
+      return { errors: ["GNSS solve: missing data.gnss.completeHex"] };
+    }
+
+    let body = isWifi ? data.wifi : { payload: data.gnss.completeHex };
     body = JSON.parse(JSON.stringify(body)); // Make a copy of this object since it is manipulated below
+
     if (isWifi) {
         delete body.timestamp;
         if ((!body.wifiAccessPoints) || body.wifiAccessPoints.length < 2) {
@@ -72,10 +78,11 @@ const solvePosition = async (args, data) => {
                     "altitude":479
                 }
             }];
-        }
+
+        delete body.msgtype;
+        delete body.timestamp;
+    }
     // console.log(endpoint);
-    delete body.msgtype;
-    delete body.timestamp;
     // console.log(body);
     LOG.post(endpoint);
     const response = await fetch(endpoint,
@@ -87,14 +94,14 @@ const solvePosition = async (args, data) => {
           },
           body:JSON.stringify(body),
         })
-        .then(response => {
-            if(!response.ok) {
-                LOG.error(response.statusText);
-                throw new Error('Could not fetch ' + (isWifi ? "wifi":"gnss")+ ' api, response: ' + response.status);
-            }
-            return response.json();
+        .then(async (response) => {
+          const text = await response.text();
+          if (!response.ok) {
+            LOG.error("Solver error " + response.status + ": " + text);
+            throw new Error("Could not fetch " + (isWifi ? "wifi":"gnss") + " api, response: " + response.status);
+          }
+          return text ? JSON.parse(text) : {};
         })
-        .then(data => data)
         .catch(err => {
           LOG.error("API failed: " + endpoint + " " + err.message);
           return null;
