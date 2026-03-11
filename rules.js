@@ -182,7 +182,7 @@ const rules = [
 
     if ((hasWifi || hasGnss) && !args.hasOwnProperty("N")) {
       // Call semtech to resolve the location
-      LOG.info("New positioning data");
+      LOG.info("New positioning data", deviceid);
       let solved = await solver.api.solvePosition(args, updates);
       if (solved && solved.result) {
         const synthesized = {
