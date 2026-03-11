@@ -55,7 +55,8 @@ module.exports.api = {
 
     client.on('message', async (topic, message) => {
       try {
-        args.v && LOG.info('Frigo message:', topic, message.toString());
+        // args.v && LOG.info('Frigo message:', topic, message.toString());
+        args.v && LOG.info('Frigo message:', topic);
 
         // 1) Parse TPX / Actility JSON
         const obj = JSON.parse(message.toString('utf-8'));

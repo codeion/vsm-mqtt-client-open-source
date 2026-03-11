@@ -38,7 +38,10 @@ module.exports.api = {
             });
     },
     publish: (args, deviceid, obj) => {
-        LOG.info("MQTT Publishing", deviceid, obj);
+        // LOG.info("MQTT Publishing", deviceid, obj);
+        LOG.info("MQTT Publishing", deviceid);
+        LOG.info("Payload Result", obj?.DevEUI_uplink?.payload?.decoded?.result);
+        LOG.info("Location Data", obj?.DevEUI_uplink?.location);
         const topic = args.T.replace(REPLACE_STRING, deviceid);
         try {
             client.publish(topic,  JSON.stringify(obj));

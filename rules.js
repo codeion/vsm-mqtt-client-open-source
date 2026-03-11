@@ -167,10 +167,10 @@ const rules = [
     let receivedDateS = new Date(updates.gnss.deviceTimeTimestamp).getTime()/1000;
     let deltaS = receivedDateS - deviceDateS;
     args.v && console.log("Device time offset: " + deltaS);
-    if (deltaS >= 5 || deltaS <= 5) {
-        // Send downlink
-        console.log("Updating device time for " + deviceid + " by " + deltaS + "s");
-        downlinkDeviceTimeDelta(args, integration, client, deviceid, Math.round(deltaS));
+    if (Math.abs(deltaS) >= 5) {
+      // Send downlink
+      console.log("Updating device time for " + deviceid + " by " + deltaS + "s");
+      downlinkDeviceTimeDelta(args, integration, client, deviceid, Math.round(deltaS));
     }
     return next;
   },

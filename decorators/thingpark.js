@@ -1,5 +1,8 @@
+const LOG = require('../utils/log');
+
 module.exports.api = {
   decorate: (obj, deveui, rawFrame) => {
+    LOG.info('Decorator', obj);
     // Inner Actility frame (DevEUI_uplink content)
     const frame = rawFrame || {};
 
