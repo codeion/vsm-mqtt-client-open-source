@@ -1,4 +1,5 @@
 const LOG = require('../utils/log');
+const { normalizeSolverResponse } = require('../utils/combain-solver');
 const combainLoraCloud= "https://lw.traxmate.io";
 const endpointWifi = combainLoraCloud +"/api/v1/solve/loraWifi";
 const endpointGnss = combainLoraCloud +"/api/v1/solve/gnss_lora_edge_singleframe";
@@ -82,8 +83,7 @@ const solvePosition = async (args, data) => {
         delete body.msgtype;
         delete body.timestamp;
     }
-    // console.log(endpoint);
-    // console.log(body);
+
     LOG.post(endpoint);
     const response = await fetch(endpoint,
         {
@@ -107,17 +107,21 @@ const solvePosition = async (args, data) => {
           return null;
         });
 
-    args.v && LOG.info("Combain loraCloud solver response:", response);
+    const normalizedResponse = normalizeSolverResponse(response, isWifi);
+
+    args.v && LOG.info("Combain loraCloud solver response:", normalizedResponse);
+
     if (isWifi) {
-        if (response && response.result && response.result.algorithmType !== "Wifi")
-            return {errors:["Got wrong type of response: " + response.result.algorithmType]};
+        if (normalizedResponse && normalizedResponse.result && normalizedResponse.result.algorithmType !== "Wifi")
+            return {errors:["Got wrong type of response: " + normalizedResponse.result.algorithmType]};
     }
 
-    // A small cludge or two - but positions are not particularily interresting unless they
+    // A small cludge or two - but positions are not particularly interesting unless they
     // are timestamped. The resolver can give timestamps, but this is added as an insurance
-    if (response && response.result && response.result.latitude)
-        response.result.positionTimestamp = new Date();
-    return response;
+    if (normalizedResponse && normalizedResponse.result && normalizedResponse.result.latitude != null)
+        normalizedResponse.result.positionTimestamp = new Date();
+
+    return normalizedResponse;
 }
 
 // Reverse run-length encode, encodes into a buffer which ends with a byte

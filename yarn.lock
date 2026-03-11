@@ -246,6 +246,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash@npm:^4.17.23":
+  version: 4.17.23
+  resolution: "lodash@npm:4.17.23"
+  checksum: 10/82504c88250f58da7a5a4289f57a4f759c44946c005dd232821c7688b5fcfbf4a6268f6a6cdde4b792c91edd2f3b5398c1d2a0998274432cff76def48735e233
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^6.0.0":
   version: 6.0.0
   resolution: "lru-cache@npm:6.0.0"
@@ -548,6 +555,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "vsm-mqtt-client-open-source@workspace:."
   dependencies:
+    lodash: "npm:^4.17.23"
     minimist: "npm:1.2.8"
     mongodb: "npm:6.3.0"
     mqtt: "npm:4.3.7"

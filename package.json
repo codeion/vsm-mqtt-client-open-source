@@ -5,8 +5,8 @@
   "main": "vsm-mqtt-client.js",
   "author": "Lars Mats",
   "license": "MIT",
-  "private": false,
   "dependencies": {
+    "lodash": "^4.17.23",
     "minimist": "1.2.8",
     "mongodb": "6.3.0",
     "mqtt": "4.3.7",
